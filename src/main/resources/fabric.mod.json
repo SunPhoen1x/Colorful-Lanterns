@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "colored-lanterns",
+	"version": "${version}",
+	"name": "Colored Lanterns",
+	"description": "This is simple mod that added a new lanterns. Server-side mod.",
+	"authors": [
+		"Sun_Phoen1x"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/colored-lanterns/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.phoen1x.ColoredLanterns"
+		],
+		"fabric-datagen": [
+			"com.phoen1x.ColoredLanternsDataGenerator"
+		]
+	},
+	"mixins": [
+		"colored-lanterns.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.10",
+		"minecraft": "~1.21.1",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}

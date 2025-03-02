@@ -1,0 +1,18 @@
+{
+    "block.colored-lanterns.red_lantern" : "Red Lantern",
+    "block.colored-lanterns.yellow_lantern" : "Yellow Lantern",
+    "block.colored-lanterns.green_lantern" : "Green Lantern",
+    "block.colored-lanterns.orange_lantern" : "Orange Lantern",
+    "block.colored-lanterns.lime_lantern" : "Lime Lantern",
+    "block.colored-lanterns.blue_lantern" : "Blue Lantern",
+    "block.colored-lanterns.light_blue_lantern" : "Light Blue Lantern",
+    "block.colored-lanterns.purple_lantern" : "Purple Lantern",
+    "block.colored-lanterns.cyan_lantern" : "Cyan Lantern",
+    "block.colored-lanterns.magenta_lantern" : "Magenta Lantern",
+    "block.colored-lanterns.pink_lantern" : "Pink Lantern",
+    "block.colored-lanterns.brown_lantern" : "Brown Lantern",
+    "block.colored-lanterns.black_lantern" : "Black Lantern",
+    "block.colored-lanterns.dark_gray_lantern" : "Gray Lantern",
+    "block.colored-lanterns.light_gray_lantern" : "Light Gray Lantern",
+    "block.colored-lanterns.white_lantern" : "White Lantern"
+}
