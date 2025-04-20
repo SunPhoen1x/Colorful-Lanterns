@@ -1,4 +1,4 @@
-package com.phoen1x.utils.TransparentBlocks;
+package com.phoen1x.utils;
 
 import eu.pb4.polymer.blocks.api.BlockModelType;
 import eu.pb4.polymer.blocks.api.PolymerBlockResourceUtils;

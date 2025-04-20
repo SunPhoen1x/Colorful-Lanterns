@@ -68,16 +68,16 @@ public class ModBlocks {
     public static void registerBlocks() {
         ItemGroup.Builder builder = PolymerItemGroupUtils.builder();
         builder.icon(() -> new ItemStack(ModBlocks.LIME_LANTERN_ITEM, 1));
-        builder.displayName(Text.translatable("Colored Lantern"));
+        builder.displayName(Text.translatable("Colorful Lantern"));
         builder.entries((displayContext, entries) -> {
             entries.add(RED_LANTERN);
-            entries.add(YELLOW_LANTERN);
-            entries.add(GREEN_LANTERN);
             entries.add(ORANGE_LANTERN);
+            entries.add(YELLOW_LANTERN);
             entries.add(LIME_LANTERN);
+            entries.add(GREEN_LANTERN);
             entries.add(CYAN_LANTERN);
-            entries.add(BLUE_LANTERN);
             entries.add(LIGHT_BLUE_LANTERN);
+            entries.add(BLUE_LANTERN);
             entries.add(PURPLE_LANTERN);
             entries.add(MAGENTA_LANTERN);
             entries.add(PINK_LANTERN);
@@ -89,8 +89,6 @@ public class ModBlocks {
         });
         ItemGroup polymerGroup = builder.build();
         PolymerItemGroupUtils.registerPolymerItemGroup(Identifier.of(MOD_ID, "blocks"), polymerGroup);
-
-        ColoredLanterns.LOGGER.info("Colored Lantern Register");
     }
 
     public static Block registerBlock(String name, Block block){
