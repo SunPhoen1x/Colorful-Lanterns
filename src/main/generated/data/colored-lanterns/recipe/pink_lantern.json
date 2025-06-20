@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "minecraft:pink_dye"
+    },
+    {
+      "item": "minecraft:lantern"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "colored-lanterns:pink_lantern"
+  }
+}
