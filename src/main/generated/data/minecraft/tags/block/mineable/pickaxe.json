@@ -1,0 +1,20 @@
+{
+  "values": [
+    "colored-lanterns:red_lantern",
+    "colored-lanterns:yellow_lantern",
+    "colored-lanterns:green_lantern",
+    "colored-lanterns:orange_lantern",
+    "colored-lanterns:lime_lantern",
+    "colored-lanterns:cyan_lantern",
+    "colored-lanterns:blue_lantern",
+    "colored-lanterns:light_blue_lantern",
+    "colored-lanterns:purple_lantern",
+    "colored-lanterns:magenta_lantern",
+    "colored-lanterns:pink_lantern",
+    "colored-lanterns:brown_lantern",
+    "colored-lanterns:black_lantern",
+    "colored-lanterns:dark_gray_lantern",
+    "colored-lanterns:light_gray_lantern",
+    "colored-lanterns:white_lantern"
+  ]
+}

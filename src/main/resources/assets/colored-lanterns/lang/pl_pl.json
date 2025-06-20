@@ -1,0 +1,18 @@
+{
+    "block.colored-lanterns.red_lantern" : "Czerwona latarenka",
+    "block.colored-lanterns.yellow_lantern" : "Żółta latarenka",
+    "block.colored-lanterns.green_lantern" : "Zielona latarenka",
+    "block.colored-lanterns.orange_lantern" : "Pomarańczowa latarenka",
+    "block.colored-lanterns.lime_lantern" : "Jasnozielona latarenka",
+    "block.colored-lanterns.blue_lantern" : "Niebieska latarenka",
+    "block.colored-lanterns.light_blue_lantern" : "Jasnoniebieska latarenka",
+    "block.colored-lanterns.purple_lantern" : "Fioletowa latarenka",
+    "block.colored-lanterns.cyan_lantern" : "Błękitna latarenka",
+    "block.colored-lanterns.magenta_lantern" : "Purpurowa latarenka",
+    "block.colored-lanterns.pink_lantern" : "Różowa latarenka",
+    "block.colored-lanterns.brown_lantern" : "Brążowa latarenka",
+    "block.colored-lanterns.black_lantern" : "Czarna latarenka",
+    "block.colored-lanterns.dark_gray_lantern" : "Szara latarenka",
+    "block.colored-lanterns.light_gray_lantern" : "Jasnoszara latarenka",
+    "block.colored-lanterns.white_lantern" : "Biała latarenka"
+}

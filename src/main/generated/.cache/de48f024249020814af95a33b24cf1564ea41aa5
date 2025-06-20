@@ -1,0 +1,17 @@
+// 1.21.4	-999999999-01-01T00:00:00	Colorful Lanterns/Block Loot Tables
+f76169c0a81c3155bb4ba8104ea8fae590747d2d data/colored-lanterns/loot_table/blocks/black_lantern.json
+a8976f87dec80ca74eb3d11d3f6e9fde7111c9a0 data/colored-lanterns/loot_table/blocks/blue_lantern.json
+1293de79f876c03f68be0286cf44b6386e1f7456 data/colored-lanterns/loot_table/blocks/brown_lantern.json
+1a1b4a28257de0d7c98cac8cb59b6eefd38ce414 data/colored-lanterns/loot_table/blocks/cyan_lantern.json
+9301b92c727f7757c19c3acb7de7111481cb4553 data/colored-lanterns/loot_table/blocks/dark_gray_lantern.json
+f2629b20fb6d30c6d797468c35492255b8b40696 data/colored-lanterns/loot_table/blocks/green_lantern.json
+2309fe810b5766646262297a7413aa97012e0603 data/colored-lanterns/loot_table/blocks/light_blue_lantern.json
+2f6631eab0da21da33dd430a0f6b32100452b934 data/colored-lanterns/loot_table/blocks/light_gray_lantern.json
+81d4a8612e063c0a2a515f0125d6b8e50a9a5fc3 data/colored-lanterns/loot_table/blocks/lime_lantern.json
+fd970c7aa2ad0281cbe10cd387505b75d15ad93f data/colored-lanterns/loot_table/blocks/magenta_lantern.json
+5f3dd0f2dcb5f3c839720b621d01ae18bc480527 data/colored-lanterns/loot_table/blocks/orange_lantern.json
+43702a0912860e6867024971a92de048984a7457 data/colored-lanterns/loot_table/blocks/pink_lantern.json
+6434f3b3e510a6842a07c31e8d84bd429a738764 data/colored-lanterns/loot_table/blocks/purple_lantern.json
+4b7f89b250f25da23b7367d9cd8bfb5d1a399376 data/colored-lanterns/loot_table/blocks/red_lantern.json
+ab150c65fe7aeceeade7fc24db34583793362454 data/colored-lanterns/loot_table/blocks/white_lantern.json
+dbb27fd04c3569162c1107f38f8bf988a6c6b536 data/colored-lanterns/loot_table/blocks/yellow_lantern.json
