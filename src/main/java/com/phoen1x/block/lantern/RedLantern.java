@@ -13,7 +13,6 @@ import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
@@ -26,7 +25,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
 import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
@@ -79,7 +77,6 @@ public class RedLantern extends BlockWithEntity implements TransparentTripWire, 
                 .with(MODEL_TYPE, ModelType.STANDING));
     }
 
-
     @Override
     public BlockState getPolymerBreakEventBlockState(BlockState state, PacketContext context) {
         return Blocks.LANTERN.getDefaultState();
@@ -91,86 +88,60 @@ public class RedLantern extends BlockWithEntity implements TransparentTripWire, 
         World world = ctx.getWorld();
         BlockPos pos = ctx.getBlockPos();
         Direction playerHorizontalFacing = ctx.getHorizontalPlayerFacing().getOpposite();
-
         Direction clickedFace = ctx.getSide();
-
-        // 1. Прикріплення до стіни (якщо клікнули на горизонтальну грань)
         if (clickedFace.getAxis().isHorizontal()) {
-            BlockPos wallPos = pos.offset(clickedFace.getOpposite());
-            if (world.getBlockState(wallPos).isSideSolidFullSquare(world, wallPos, clickedFace)) {
-                return this.getDefaultState()
-                        .with(HANGING, false)
-                        .with(FACING, clickedFace)
-                        .with(MODEL_TYPE, ModelType.WALL);
-            }
-        }
-        // 2. Підвішування (якщо клікнули на нижню грань)
-        else if (clickedFace == Direction.DOWN) {
-            BlockState stateAbove = world.getBlockState(pos.up());
-            if (stateAbove.isSolidBlock(world, pos.up()) ||
-                    stateAbove.getBlock() == Blocks.CHAIN ||
-                    stateAbove.isOf(Blocks.LANTERN) ||
-                    (stateAbove.getBlock() instanceof RedLantern && !stateAbove.get(HANGING))) {
-                return this.getDefaultState()
-                        .with(HANGING, true)
-                        .with(FACING, playerHorizontalFacing)
-                        .with(MODEL_TYPE, ModelType.HANGING);
-            }
-        }
-
-        // 3. Стоячий ліхтар (якщо жоден з попередніх варіантів не спрацював)
-        if (world.getBlockState(pos.down()).isSideSolidFullSquare(world, pos.down(), Direction.UP)) {
-            return this.getDefaultState()
+            BlockState potentialWallState = this.getDefaultState()
                     .with(HANGING, false)
-                    .with(FACING, playerHorizontalFacing)
-                    .with(MODEL_TYPE, ModelType.STANDING);
+                    .with(FACING, clickedFace)
+                    .with(MODEL_TYPE, ModelType.WALL);
+            if (potentialWallState.canPlaceAt(world, pos)) {
+                return potentialWallState;
+            }
         }
+        BlockState potentialHangingState = this.getDefaultState()
+                .with(HANGING, true)
+                .with(FACING, playerHorizontalFacing)
+                .with(MODEL_TYPE, ModelType.HANGING);
+        if (ctx.getSide() == Direction.DOWN && potentialHangingState.canPlaceAt(world, pos)) {
+            return potentialHangingState;
+        }
+        BlockState potentialStandingState = this.getDefaultState()
+                .with(HANGING, false)
+                .with(FACING, playerHorizontalFacing)
+                .with(MODEL_TYPE, ModelType.STANDING);
 
+        if (potentialStandingState.canPlaceAt(world, pos)) {
+            return potentialStandingState;
+        }
         return null;
     }
-
 
     @Override
     public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
         ModelType modelType = state.get(MODEL_TYPE);
-
+        Direction facing = state.get(FACING);
         if (modelType == ModelType.HANGING) {
-            // Висячий ліхтар перевіряє тільки опору зверху
-            BlockState stateAbove = world.getBlockState(pos.up());
-            return stateAbove.isSolidBlock(world, pos.up()) ||
-                    stateAbove.getBlock() == Blocks.CHAIN ||
-                    stateAbove.isOf(Blocks.LANTERN) ||
-                    (stateAbove.getBlock() instanceof RedLantern && !stateAbove.get(HANGING));
+            return Block.sideCoversSmallSquare(world, pos.up(), Direction.DOWN);
         } else if (modelType == ModelType.WALL) {
-            // Настінний ліхтар перевіряє тільки опору збоку, за напрямком FACING
-            Direction facing = state.get(FACING);
-            BlockPos supportPos = pos.offset(facing.getOpposite());
-            return world.getBlockState(supportPos).isSideSolidFullSquare(world, supportPos, facing);
-        } else { // ModelType.STANDING
-            // Стоячий ліхтар перевіряє тільки опору знизу
-            return world.getBlockState(pos.down()).isSideSolidFullSquare(world, pos.down(), Direction.UP);
+            return Block.sideCoversSmallSquare(world, pos.offset(facing.getOpposite()), facing);
+        } else {
+            return Block.sideCoversSmallSquare(world, pos.down(), Direction.UP);
         }
     }
 
     @Override
     public BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
-        // Запланувати тік для перевірки опори
-        if (!this.canPlaceAt(state, world, pos)) {
-            // Перетворення WorldView на World безпечне у цьому контексті для scheduleBlockTick на сервері.
-            if (world instanceof World) {
-                ((World)world).scheduleBlockTick(pos, this, 1);
+        if (!state.canPlaceAt(world, pos)) {
+            if (world instanceof World actualWorld) {
+                actualWorld.scheduleBlockTick(pos, this, 1);
             }
         }
-        // Викликаємо батьківський метод. Цей метод не видаляє блок сам по собі,
-        // а лише інформує про зміни в сусідніх блоках.
         return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
     @Override
     public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-        // Цей метод викликається після запланованого тіка
         if (!this.canPlaceAt(state, world, pos)) {
-            // Якщо блок більше не може бути розміщений (втратив опору), руйнуємо його.
             world.breakBlock(pos, true);
         }
     }
@@ -194,7 +165,6 @@ public class RedLantern extends BlockWithEntity implements TransparentTripWire, 
 
     @Override
     protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
-        // Якщо блок замінюється іншим або руйнується, викидаємо предмети
         ItemScatterer.onStateReplaced(state, world, pos);
         super.onStateReplaced(state, world, pos, moved);
     }
