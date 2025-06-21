@@ -4,7 +4,6 @@ import com.phoen1x.block.ModBlocks;
 import com.phoen1x.block.lantern.*;
 import com.phoen1x.entity.ModEntities;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
-import eu.pb4.polymer.resourcepack.extras.api.ResourcePackExtras;
 import net.fabricmc.api.ModInitializer;
 
 import net.minecraft.util.Identifier;
@@ -22,12 +21,12 @@ public class ColoredLanterns implements ModInitializer {
 
 		initModels();
 		if (PolymerResourcePackUtils.addModAssets(MOD_ID)) {
-			ResourcePackExtras.forDefault().addBridgedModelsFolder(id("block"), id("item"), id("sgui"));
-			LOGGER.info("Colorful Lanterns 0.6-1.21.1");
+			LOGGER.info("Colorful Lanterns 1.21.3-0.1");
 		} else {
 			LOGGER.error("Failed to add mod assets for " + MOD_ID);
 		}
 		PolymerResourcePackUtils.markAsRequired();
+		PolymerResourcePackUtils.addBridgedModelsFolder(id("block"));
 	}
 
 	public void initModels(){

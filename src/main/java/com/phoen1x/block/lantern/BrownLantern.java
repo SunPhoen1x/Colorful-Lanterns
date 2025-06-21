@@ -60,7 +60,7 @@ public class BrownLantern extends RedLantern {
             this.lantern.setScale(new Vector3f(2f));
 
             if (modelType == ModelType.WALL) {
-                float yaw = state.get(FACING).getPositiveHorizontalDegrees();
+                float yaw = state.get(FACING).asRotation();
                 this.lantern.setYaw(yaw);
             }
             this.addElement(lantern);
