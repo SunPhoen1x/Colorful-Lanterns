@@ -19,7 +19,7 @@ public class ColoredLanterns implements ModInitializer {
 		ModEntities.register();
 		initModels();
 		if (PolymerResourcePackUtils.addModAssets(MOD_ID)) {
-			LOGGER.info("Colorful Lanterns 0.6-1.21.1");
+			LOGGER.info("Colorful Lanterns 1.21.1-0.7");
 		} else {
 			LOGGER.error("Failed to add mod assets for " + MOD_ID);
 		}

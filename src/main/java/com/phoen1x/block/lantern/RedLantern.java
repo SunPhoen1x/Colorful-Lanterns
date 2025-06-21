@@ -92,31 +92,32 @@ public class RedLantern extends BlockWithEntity implements TransparentTripWire, 
         Direction playerFacing = ctx.getHorizontalPlayerFacing().getOpposite();
 
         if (ctx.getSide() == Direction.DOWN) {
-            BlockState stateAbove = world.getBlockState(pos.up());
-            if (stateAbove.isSolidBlock(world, pos.up()) ||
-                    stateAbove.getBlock() == Blocks.CHAIN ||
-                    stateAbove.isOf(Blocks.LANTERN) ||
-                    (stateAbove.getBlock() instanceof RedLantern && !stateAbove.get(HANGING))) {
-                return this.getDefaultState()
-                        .with(HANGING, true)
-                        .with(FACING, playerFacing)
-                        .with(MODEL_TYPE, ModelType.HANGING);
+            BlockState hangingState = this.getDefaultState()
+                    .with(HANGING, true)
+                    .with(FACING, playerFacing)
+                    .with(MODEL_TYPE, ModelType.HANGING);
+            if (hangingState.canPlaceAt(world, pos)) {
+                return hangingState;
             }
         }
-        if (world.getBlockState(pos.down()).isSideSolidFullSquare(world, pos.down(), Direction.UP)) {
-            return this.getDefaultState()
-                    .with(HANGING, false)
-                    .with(FACING, playerFacing)
-                    .with(MODEL_TYPE, ModelType.STANDING);
+
+        BlockState standingState = this.getDefaultState()
+                .with(HANGING, false)
+                .with(FACING, playerFacing)
+                .with(MODEL_TYPE, ModelType.STANDING);
+        if (standingState.canPlaceAt(world, pos)) {
+            return standingState;
         }
-        if (ctx.getSide().getHorizontal() != -1) {
-            Direction wallDirection = ctx.getSide();
-            BlockPos wallPos = pos.offset(wallDirection.getOpposite());
-            if (world.getBlockState(wallPos).isSideSolidFullSquare(world, wallPos, wallDirection)) {
-                return this.getDefaultState()
+
+        for (Direction direction : ctx.getPlacementDirections()) {
+            if (direction.getAxis().isHorizontal()) {
+                BlockState wallState = this.getDefaultState()
                         .with(HANGING, false)
-                        .with(FACING, wallDirection)
+                        .with(FACING, direction)
                         .with(MODEL_TYPE, ModelType.WALL);
+                if (wallState.canPlaceAt(world, pos)) {
+                    return wallState;
+                }
             }
         }
         return null;
@@ -125,63 +126,45 @@ public class RedLantern extends BlockWithEntity implements TransparentTripWire, 
 
     @Override
     public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
-        if (state.get(HANGING)) {
-            BlockState stateAbove = world.getBlockState(pos.up());
-            return stateAbove.isSolidBlock(world, pos.up()) ||
-                    stateAbove.getBlock() == Blocks.CHAIN ||
-                    stateAbove.isOf(Blocks.LANTERN) ||
-                    (stateAbove.getBlock() instanceof RedLantern && !stateAbove.get(HANGING));
-        }
-
+        ModelType modelType = state.get(MODEL_TYPE);
         Direction facing = state.get(FACING);
-        BlockPos supportPos = pos.offset(facing.getOpposite());
 
-        if (world.getBlockState(pos.down()).isSideSolidFullSquare(world, pos.down(), Direction.UP)) {
-            return true;
+        if (modelType == ModelType.HANGING) {
+            return Block.sideCoversSmallSquare(world, pos.up(), Direction.DOWN);
+        } else if (modelType == ModelType.STANDING) {
+            return Block.sideCoversSmallSquare(world, pos.down(), Direction.UP);
+        } else if (modelType == ModelType.WALL) {
+            return Block.sideCoversSmallSquare(world, pos.offset(facing.getOpposite()), facing);
         }
-        return world.getBlockState(supportPos).isSideSolidFullSquare(world, supportPos, facing);
+        return false;
+    }
+
+    protected static Direction getAttachmentDirection(BlockState state) {
+        ModelType modelType = state.get(MODEL_TYPE);
+        if (modelType == ModelType.HANGING) {
+            return Direction.DOWN;
+        } else if (modelType == ModelType.STANDING) {
+            return Direction.UP;
+        } else if (modelType == ModelType.WALL) {
+            return state.get(FACING);
+        }
+        return Direction.NORTH;
     }
 
     @Override
     public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-        if (!state.get(HANGING)) {
-            Direction facing = state.get(FACING);
-            BlockPos supportPos = pos.offset(facing.getOpposite());
-
-            boolean isWallMounted = state.get(MODEL_TYPE) == ModelType.WALL &&
-                    !world.getBlockState(supportPos).isSideSolidFullSquare(world, supportPos, facing);
-
-            boolean isStanding = state.get(MODEL_TYPE) == ModelType.STANDING &&
-                    !world.getBlockState(pos.down()).isSideSolidFullSquare(world, pos.down(), Direction.UP);
-
-            if (isWallMounted || isStanding) {
-                return Blocks.AIR.getDefaultState();
-            }
+        if (!state.canPlaceAt(world, pos)) {
+            return Blocks.AIR.getDefaultState();
         }
         return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
     }
 
     @Override
     public void neighborUpdate(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
-        if (state.get(HANGING)) {
-            BlockState stateAbove = world.getBlockState(pos.up());
-            if (!stateAbove.isSolidBlock(world, pos.up()) &&
-                    stateAbove.getBlock() != Blocks.CHAIN &&
-                    !stateAbove.isOf(Blocks.LANTERN) &&
-                    !(stateAbove.getBlock() instanceof RedLantern && !stateAbove.get(HANGING))) {
-                world.breakBlock(pos, true);
-            }
-        } else if (state.get(MODEL_TYPE) == ModelType.WALL) {
-            Direction facing = state.get(FACING);
-            BlockPos supportPos = pos.offset(facing.getOpposite());
-            if (!world.getBlockState(supportPos).isSideSolidFullSquare(world, supportPos, facing)) {
-                world.breakBlock(pos, true);
-            }
-        } else if (state.get(MODEL_TYPE) == ModelType.STANDING) {
-            if (!world.getBlockState(pos.down()).isSideSolidFullSquare(world, pos.down(), Direction.UP)) {
-                world.breakBlock(pos, true);
-            }
+        if (!state.canPlaceAt(world, pos)) {
+            world.breakBlock(pos, true);
         }
+        super.neighborUpdate(state, world, pos, block, fromPos, notify);
     }
 
 
@@ -204,7 +187,9 @@ public class RedLantern extends BlockWithEntity implements TransparentTripWire, 
 
     @Override
     protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        ItemScatterer.onStateReplaced(state, newState, world, pos);
+        if (!state.isOf(newState.getBlock())) {
+            ItemScatterer.onStateReplaced(state, newState, world, pos);
+        }
         super.onStateReplaced(state, world, pos, newState, moved);
     }
 
