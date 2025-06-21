@@ -23,7 +23,7 @@ public class ColoredLanterns implements ModInitializer {
 		initModels();
 		if (PolymerResourcePackUtils.addModAssets(MOD_ID)) {
 			ResourcePackExtras.forDefault().addBridgedModelsFolder(id("block"), id("item"), id("sgui"));
-			LOGGER.info("Colorful Lanterns 0.6-1.21.1");
+			LOGGER.info("Colorful Lanterns 1.21.4-0.2");
 		} else {
 			LOGGER.error("Failed to add mod assets for " + MOD_ID);
 		}

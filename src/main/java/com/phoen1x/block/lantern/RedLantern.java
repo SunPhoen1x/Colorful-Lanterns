@@ -13,7 +13,6 @@ import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
@@ -26,7 +25,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
 import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
@@ -79,7 +77,6 @@ public class RedLantern extends BlockWithEntity implements TransparentTripWire, 
                 .with(MODEL_TYPE, ModelType.STANDING));
     }
 
-
     @Override
     public BlockState getPolymerBreakEventBlockState(BlockState state, PacketContext context) {
         return Blocks.LANTERN.getDefaultState();
@@ -90,63 +87,54 @@ public class RedLantern extends BlockWithEntity implements TransparentTripWire, 
     public BlockState getPlacementState(ItemPlacementContext ctx) {
         World world = ctx.getWorld();
         BlockPos pos = ctx.getBlockPos();
-        Direction playerFacing = ctx.getHorizontalPlayerFacing().getOpposite();
-
-        if (ctx.getSide() == Direction.DOWN) {
-            BlockState stateAbove = world.getBlockState(pos.up());
-            if (stateAbove.isSolidBlock(world, pos.up()) ||
-                    stateAbove.getBlock() == Blocks.CHAIN ||
-                    stateAbove.isOf(Blocks.LANTERN) ||
-                    (stateAbove.getBlock() instanceof RedLantern && !stateAbove.get(HANGING))) {
-                return this.getDefaultState()
-                        .with(HANGING, true)
-                        .with(FACING, playerFacing)
-                        .with(MODEL_TYPE, ModelType.HANGING);
-            }
-        }
-        if (world.getBlockState(pos.down()).isSideSolidFullSquare(world, pos.down(), Direction.UP)) {
-            return this.getDefaultState()
+        Direction playerHorizontalFacing = ctx.getHorizontalPlayerFacing().getOpposite();
+        Direction clickedFace = ctx.getSide();
+        if (clickedFace.getAxis().isHorizontal()) {
+            BlockState potentialWallState = this.getDefaultState()
                     .with(HANGING, false)
-                    .with(FACING, playerFacing)
-                    .with(MODEL_TYPE, ModelType.STANDING);
-        }
-        if (ctx.getSide().getPositiveHorizontalDegrees() != -1) {
-            Direction wallDirection = ctx.getSide();
-            BlockPos wallPos = pos.offset(wallDirection.getOpposite());
-            if (world.getBlockState(wallPos).isSideSolidFullSquare(world, wallPos, wallDirection)) {
-                return this.getDefaultState()
-                        .with(HANGING, false)
-                        .with(FACING, wallDirection)
-                        .with(MODEL_TYPE, ModelType.WALL);
+                    .with(FACING, clickedFace)
+                    .with(MODEL_TYPE, ModelType.WALL);
+            if (potentialWallState.canPlaceAt(world, pos)) {
+                return potentialWallState;
             }
+        }
+        BlockState potentialHangingState = this.getDefaultState()
+                .with(HANGING, true)
+                .with(FACING, playerHorizontalFacing)
+                .with(MODEL_TYPE, ModelType.HANGING);
+        if (ctx.getSide() == Direction.DOWN && potentialHangingState.canPlaceAt(world, pos)) {
+            return potentialHangingState;
+        }
+        BlockState potentialStandingState = this.getDefaultState()
+                .with(HANGING, false)
+                .with(FACING, playerHorizontalFacing)
+                .with(MODEL_TYPE, ModelType.STANDING);
+
+        if (potentialStandingState.canPlaceAt(world, pos)) {
+            return potentialStandingState;
         }
         return null;
     }
 
-
     @Override
     public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
-        if (state.get(HANGING)) {
-            BlockState stateAbove = world.getBlockState(pos.up());
-            return stateAbove.isSolidBlock(world, pos.up()) ||
-                    stateAbove.getBlock() == Blocks.CHAIN ||
-                    stateAbove.isOf(Blocks.LANTERN) ||
-                    (stateAbove.getBlock() instanceof RedLantern && !stateAbove.get(HANGING));
-        }
-
+        ModelType modelType = state.get(MODEL_TYPE);
         Direction facing = state.get(FACING);
-        BlockPos supportPos = pos.offset(facing.getOpposite());
-
-        if (world.getBlockState(pos.down()).isSideSolidFullSquare(world, pos.down(), Direction.UP)) {
-            return true;
+        if (modelType == ModelType.HANGING) {
+            return Block.sideCoversSmallSquare(world, pos.up(), Direction.DOWN);
+        } else if (modelType == ModelType.WALL) {
+            return Block.sideCoversSmallSquare(world, pos.offset(facing.getOpposite()), facing);
+        } else {
+            return Block.sideCoversSmallSquare(world, pos.down(), Direction.UP);
         }
-        return world.getBlockState(supportPos).isSideSolidFullSquare(world, supportPos, facing);
     }
 
     @Override
     public BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
-        if (!this.canPlaceAt(state, world, pos)) {
-            ((World)world).scheduleBlockTick(pos, this, 1);
+        if (!state.canPlaceAt(world, pos)) {
+            if (world instanceof World actualWorld) {
+                actualWorld.scheduleBlockTick(pos, this, 1);
+            }
         }
         return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
@@ -177,7 +165,9 @@ public class RedLantern extends BlockWithEntity implements TransparentTripWire, 
 
     @Override
     protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        ItemScatterer.onStateReplaced(state, newState, world, pos);
+        if (!state.isOf(newState.getBlock())) {
+            ItemScatterer.onStateReplaced(state, newState, world, pos);
+        }
         super.onStateReplaced(state, world, pos, newState, moved);
     }
 
